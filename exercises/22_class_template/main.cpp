@@ -1,4 +1,7 @@
 ﻿#include "../exercise.h"
+#include <iterator>
+#include <numeric>
+#include <cstring>
 
 // READ: 类模板 <https://zh.cppreference.com/w/cpp/language/class_template>
 
@@ -8,7 +11,12 @@ struct Tensor4D {
     T *data;
 
     Tensor4D(unsigned int const shape_[4], T const *data_) {
-        unsigned int size = 1;
+        for (int i = 0; i < 4; i++) {
+            shape[i] = shape_[i];
+        }
+        unsigned int size = std::accumulate(std::begin(shape), std::end(shape), 1, [](unsigned a, unsigned b) {
+            return a * b;
+        });
         // TODO: 填入正确的 shape 并计算 size
         data = new T[size];
         std::memcpy(data, data_, size * sizeof(T));
@@ -28,6 +36,44 @@ struct Tensor4D {
     // 则 `this` 与 `others` 相加时，3 个形状为 `[1, 2, 1, 4]` 的子张量各自与 `others` 对应项相加。
     Tensor4D &operator+=(Tensor4D const &others) {
         // TODO: 实现单向广播的加法
+        unsigned r1[3] {
+            shape[1] * shape[2] * shape[3],
+            shape[2] * shape[3],
+            shape[3],
+        };
+        unsigned r2[3] {
+            others.shape[1] * others.shape[2] * others.shape[3],
+            others.shape[2] * others.shape[3],
+            others.shape[3],
+        };
+        for (auto i = 3; i >= 0; i--) {
+            
+        }
+        for (int i = 0; i < shape[0]; i++) {
+            int i1 = i;
+            if (others.shape[0] != shape[0]) {
+                i1 = 0;
+            }
+            for (int j = 0; j < shape[1]; j++) {
+                int j1 = j;
+                if (others.shape[1] != shape[1]) {
+                    j1 = 0;
+                }
+                for (int k = 0; k < shape[2]; k++) {
+                    int k1 = k;
+                    if (others.shape[2] != shape[2]) {
+                        k1 = 0;
+                    }
+                    for (int l = 0; l < shape[3]; l++) {
+                        int l1 = l;
+                        if (others.shape[3] != shape[3]) {
+                            l1 = 0;
+                        }
+                        data[i*r1[0] + j*r1[1] + k*r1[2] + l] += others.data[i1*r2[0] + j1*r2[1] + k1*r2[2] + l1];
+                    }
+                }
+            }
+        }
         return *this;
     }
 };
